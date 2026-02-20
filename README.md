@@ -11,7 +11,7 @@
 3. 点击"安装扩展"（Install Extension）
 4. 在输入框中粘贴以下地址：
    ```
-   https://testingcf.jsdelivr.net/gh/你的GitHub用户名/jinyong-mvu@main/bundle.js
+   https://testingcf.jsdelivr.net/gh/dengyanyu1994-art/jinyong-mvu@main/bundle.js
    ```
 5. 点击"为所有用户安装"（Install for all users）
 6. 等待安装完成
@@ -192,13 +192,13 @@ console.log(triggers)
 使用jsDelivr CDN访问文件：
 
 ```
-https://testingcf.jsdelivr.net/gh/你的GitHub用户名/jinyong-mvu@main/bundle.js
+https://testingcf.jsdelivr.net/gh/dengyanyu1994-art/jinyong-mvu@main/bundle.js
 ```
 
 例如，如果你的GitHub用户名是 `username`，链接就是：
 
 ```
-https://testingcf.jsdelivr.net/gh/username/jinyong-mvu@main/bundle.js
+https://testingcf.jsdelivr.net/gh/dengyanyu1994-art/jinyong-mvu@main/bundle.js
 ```
 
 ### 4. 在SillyTavern中导入
@@ -215,7 +215,7 @@ https://testingcf.jsdelivr.net/gh/username/jinyong-mvu@main/bundle.js
 
 1. 克隆仓库：
    ```bash
-   git clone https://github.com/你的GitHub用户名/jinyong-mvu.git
+   git clone https://github.com/dengyanyu1994-art/jinyong-mvu.git
    cd jinyong-mvu
    ```
 
@@ -244,12 +244,12 @@ git push origin v1.0.0
 使用特定版本的CDN链接：
 
 ```
-https://testingcf.jsdelivr.net/gh/你的GitHub用户名/jinyong-mvu@v1.0.0/bundle.js
+https://testingcf.jsdelivr.net/gh/dengyanyu1994-art/jinyong-mvu@v1.0.0/bundle.js
 ```
 
 ## 技术支持
 
-- GitHub Issues: https://github.com/你的GitHub用户名/jinyong-mvu/issues
+- GitHub Issues: https://github.com/dengyanyu1994-art/jinyong-mvu/issues
 - SillyTavern GitHub: https://github.com/SillyTavern/SillyTavern
 - SillyTavern Discord: https://discord.gg/sillytavern
 - SillyTavern文档: https://docs.sillytavern.app/
@@ -277,4 +277,5 @@ MIT License
 
 - 感谢SillyTavern项目提供的扩展系统
 - 感谢jsDelivr提供的CDN服务
+
 - 感谢金庸先生创造的武侠世界
