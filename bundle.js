@@ -513,4 +513,286 @@
     });
   }
 
+  // 注册MVU工具函数到SillyTavern
+  function registerMVUTools() {
+    const toolManager = window.toolManager || window.ToolManager;
+    
+    if (!toolManager) {
+      console.warn('未检测到SillyTavern工具管理器，工具注册失败');
+      return;
+    }
+
+    const mvuUpdateTool = {
+      name: 'mvu_VariableUpdate',
+      displayName: 'MVU update',
+      description: 'Update MVU variables based on story development',
+      parameters: {
+        type: 'object',
+        properties: {
+          action: {
+            type: 'string',
+            enum: ['set', 'add', 'insert', 'delete', 'get'],
+            description: 'Action to perform'
+          },
+          variable: {
+            type: 'string',
+            description: 'Variable name'
+          },
+          value: {
+            type: 'string',
+            description: 'Value to set/add/insert'
+          },
+          reason: {
+            type: 'string',
+            description: 'Reason for update'
+          }
+        },
+        required: ['action', 'variable']
+      },
+      action: async function(params) {
+        const { action, variable, value, reason } = params;
+        console.log('MVU工具调用:', { action, variable, value, reason });
+        
+        try {
+          let result;
+          switch (action) {
+            case 'set':
+              result = mvuSystem.setVariable(variable, value);
+              mvuSystem.updateSystemTime();
+              break;
+            case 'add':
+              if (typeof mvuSystem.getVariable(variable) === 'number') {
+                const current = mvuSystem.getVariable(variable);
+                result = mvuSystem.setVariable(variable, current + Number(value));
+              } else {
+                result = mvuSystem.addToArray(variable, value);
+              }
+              mvuSystem.updateSystemTime();
+              break;
+            case 'insert':
+              result = mvuSystem.addToArray(variable, value);
+              mvuSystem.updateSystemTime();
+              break;
+            case 'delete':
+              if (Array.isArray(mvuSystem.getVariable(variable))) {
+                result = mvuSystem.removeFromArray(variable, value);
+              } else {
+                mvuSystem.setVariable(variable, null);
+                result = true;
+              }
+              mvuSystem.updateSystemTime();
+              break;
+            case 'get':
+              result = mvuSystem.getVariable(variable);
+              break;
+            default:
+              throw new Error(`Unknown action: ${action}`);
+          }
+          
+          if (['set', 'add'].includes(action)) {
+            mvuSystem.calculateRealm();
+            mvuSystem.calculateReputationDesc();
+            mvuSystem.calculateStatus();
+          }
+          
+          return {
+            success: result,
+            message: `MVU变量更新${result ? '成功' : '失败'}`,
+            reason: reason || '手动更新',
+            timestamp: new Date().toISOString()
+          };
+        } catch (error) {
+          console.error('MVU工具执行失败:', error);
+          return {
+            success: false,
+            message: `MVU变量更新失败: ${error.message}`,
+            error: error.message
+          };
+        }
+      },
+      shouldRegister: function() {
+        return true;
+      },
+      stealth: false
+    };
+
+    const mvuStatusTool = {
+      name: 'mvu_GetStatus',
+      displayName: 'MVU status',
+      description: 'Get current MVU variable status',
+      parameters: {
+        type: 'object',
+        properties: {
+          category: {
+            type: 'string',
+            enum: ['all', 'protagonist', 'world', 'equipment', 'martial', 'relationship', 'story'],
+            description: 'Category of variables to retrieve'
+          }
+        },
+        required: []
+      },
+      action: async function(params) {
+        const { category = 'all' } = params;
+        console.log('MVU状态查询:', category);
+        
+        try {
+          let status;
+          switch (category) {
+            case 'protagonist':
+              status = {
+                name: mvuSystem.getVariable('protagonist_name'),
+                age: mvuSystem.getVariable('protagonist_age'),
+                realm: mvuSystem.getVariable('protagonist_martial_realm'),
+                reputation: mvuSystem.getVariable('protagonist_reputation'),
+                status: mvuSystem.getVariable('protagonist_status'),
+                hp: `${mvuSystem.getVariable('protagonist_current_hp')}/${mvuSystem.getVariable('protagonist_max_hp')}`,
+                mp: `${mvuSystem.getVariable('protagonist_current_mp')}/1000`
+              };
+              break;
+            case 'world':
+              status = {
+                year: mvuSystem.getVariable('world_time_year'),
+                month: mvuSystem.getVariable('world_time_month'),
+                day: mvuSystem.getVariable('world_time_day'),
+                hour: mvuSystem.getVariable('world_time_hour'),
+                weather: mvuSystem.getVariable('world_weather'),
+                region: mvuSystem.getVariable('world_location_region'),
+                place: mvuSystem.getVariable('world_location_place')
+              };
+              break;
+            case 'equipment':
+              status = {
+                weapon: mvuSystem.getVariable('protagonist_weapon'),
+                armor: mvuSystem.getVariable('protagonist_armor'),
+                accessory: mvuSystem.getVariable('protagonist_accessory'),
+                current_weapon: mvuSystem.getVariable('protagonist_weapon_current'),
+                manuals: mvuSystem.getVariable('protagonist_manuals_learned'),
+                skills: mvuSystem.getVariable('protagonist_skills_learned')
+              };
+              break;
+            case 'martial':
+              status = {
+                inner_power: mvuSystem.getVariable('protagonist_inner_power'),
+                bone_structure: mvuSystem.getVariable('protagonist_bone_structure'),
+                external_skill: mvuSystem.getVariable('protagonist_external_skill'),
+                external_defense: mvuSystem.getVariable('protagonist_external_defense'),
+                internal_skill: mvuSystem.getVariable('protagonist_internal_skill'),
+                internal_defense: mvuSystem.getVariable('protagonist_internal_defense'),
+                comprehension: mvuSystem.getVariable('protagonist_comprehension'),
+                luck: mvuSystem.getVariable('protagonist_luck'),
+                charisma: mvuSystem.getVariable('protagonist_charisma')
+              };
+              break;
+            case 'relationship':
+              status = {
+                friends: mvuSystem.getVariable('protagonist_friends'),
+                enemies: mvuSystem.getVariable('protagonist_enemies'),
+                sect: mvuSystem.getVariable('protagonist_sect'),
+                sect_position: mvuSystem.getVariable('protagonist_sect_position')
+              };
+              break;
+            case 'story':
+              status = {
+                chapter: mvuSystem.getVariable('story_chapter'),
+                progress: mvuSystem.getVariable('story_main_progress'),
+                sidequests: mvuSystem.getVariable('story_sidequests_completed'),
+                current_sidequest: mvuSystem.getVariable('story_sidequest_current')
+              };
+              break;
+            case 'all':
+            default:
+              status = mvuSystem.getAllVariables();
+              break;
+          }
+          
+          return {
+            success: true,
+            category: category,
+            data: status,
+            timestamp: new Date().toISOString()
+          };
+        } catch (error) {
+          console.error('MVU状态查询失败:', error);
+          return {
+            success: false,
+            message: `MVU状态查询失败: ${error.message}`,
+            error: error.message
+          };
+        }
+      },
+      shouldRegister: function() {
+        return true;
+      },
+      stealth: false
+    };
+
+    const mvuDetectTool = {
+      name: 'mvu_DetectTriggers',
+      displayName: 'MVU detect triggers',
+      description: 'Detect MVU trigger keywords in text and suggest variable updates',
+      parameters: {
+        type: 'object',
+        properties: {
+          text: {
+            type: 'string',
+            description: 'Text to analyze for trigger keywords'
+          }
+        },
+        required: ['text']
+      },
+      action: async function(params) {
+        const { text } = params;
+        console.log('MVU触发检测:', text);
+        
+        try {
+          const triggers = mvuSystem.detectTriggers(text);
+          return {
+            success: true,
+            text: text,
+            triggers: triggers,
+            suggestions: triggers.map(t => ({
+              type: t.trigger.name,
+              keyword: t.keyword,
+              action: t.trigger.action,
+              description: t.trigger.description
+            })),
+            timestamp: new Date().toISOString()
+          };
+        } catch (error) {
+          console.error('MVU触发检测失败:', error);
+          return {
+            success: false,
+            message: `MVU触发检测失败: ${error.message}`,
+            error: error.message
+          };
+        }
+      },
+      shouldRegister: function() {
+        return true;
+      },
+      stealth: false
+    };
+
+    try {
+      toolManager.registerTool(mvuUpdateTool);
+      console.log('[ToolManager] Registered function tool: ToolDefinition {#name: \'mvu_VariableUpdate\', #displayName: \'MVU update\', #description: \'Update MVU variables based on story development\', #parameters: {…}, #action: ƒ, …}');
+      
+      toolManager.registerTool(mvuStatusTool);
+      console.log('[ToolManager] Registered function tool: ToolDefinition {#name: \'mvu_GetStatus\', #displayName: \'MVU status\', #description: \'Get current MVU variable status\', #parameters: {…}, #action: ƒ, …}');
+      
+      toolManager.registerTool(mvuDetectTool);
+      console.log('[ToolManager] Registered function tool: ToolDefinition {#name: \'mvu_DetectTriggers\', #displayName: \'MVU detect triggers\', #description: \'Detect MVU trigger keywords in text and suggest variable updates\', #parameters: {…}, #action: ƒ, …}');
+      
+      console.log('MVU工具注册成功！共注册3个工具函数');
+    } catch (error) {
+      console.error('MVU工具注册失败:', error);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', registerMVUTools);
+  } else {
+    setTimeout(registerMVUTools, 1000);
+  }
+
 })(typeof window !== 'undefined' ? window : global);
