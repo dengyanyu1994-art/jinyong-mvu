@@ -119,7 +119,7 @@
     },
     reputation_calc: {
       name: '名声计算',
-      rule: '名声值0-200：无名小卒；200-500：江湖好手；500-800：一方豪侠；800-100：武林泰斗',
+      rule: '名声值0-200：无名小卒；200-500：江湖好手；500-800：一方豪侠；800-1000：武林泰斗',
       description: '根据名声值自动生成名声描述'
     },
     realm_judgment: {
@@ -165,13 +165,13 @@
 更新规则：
 - 气血值更新：轻伤-100~300，重伤-300~600，垂危-600~900
 - 状态更新：当前气血>700状态="正常"，400~700状态="轻伤"，100~400状态="重伤"，<100状态="垂危"
-- 名声值更新：击败高手+2~5，击杀绝顶高手+10，滥杀无辜-200~400
+- 名声值更新：击败高手+1~2，击杀绝顶高手+3，滥杀无辜-200~400
 - 外功/内功更新：激烈战斗外功+1~3内功+1~3，轻松取胜外功+0~1内功+0~1
 
 修炼变量更新
 触发条件：检测到修炼关键词（"修炼"、"练功"、"突破"、"精进"、"领悟"、"习得"、"学会"）
 更新规则：
-- 内力更新：普通修炼+1~2，高人指点+2~3，奇遇机缘+3~8
+- 内力更新：普通修炼+1~2，高人指点+2~3，奇遇机缘+3~5
 - 根骨更新：修炼内功+0~1，服用丹药+1~2
 - 外功/内功更新：修炼招式+1~2，修炼内功+1~2
 - 武学境界更新：综合数值<100不入流，100~300三流，300~500二流，500~700一流，700~850绝顶，850~950宗师，950~990大宗师，990~1000传说
@@ -392,9 +392,9 @@
     calculateReputationDesc() {
       const reputation = this.variables.protagonist_reputation;
       let desc;
-      if (reputation < 20) desc = '无名小卒';
-      else if (reputation < 50) desc = '江湖好手';
-      else if (reputation < 80) desc = '一方豪侠';
+      if (reputation < 200) desc = '无名小卒';
+      else if (reputation < 500) desc = '江湖好手';
+      else if (reputation < 800) desc = '一方豪侠';
       else desc = '武林泰斗';
 
       this.setVariable('protagonist_reputation_desc', desc);
@@ -468,7 +468,7 @@
 年份：${this.variables.world_time_year}年
 月份：${this.variables.world_time_month}月
 日期：${this.variables.world_time_day}日
-时辰：${this.variables.world_time_hour}
+时辰：${this.variables.world_time_hour}时
 天气：${this.variables.world_weather}`;
     }
   }
